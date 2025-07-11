@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supabase用户登录</title>
+    <title>用户登录 - Supabase驱动</title>
     <style>
         * {
             margin: 0;
@@ -12,62 +12,115 @@
         }
 
         body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
 
         .login-container {
             width: 100%;
             max-width: 450px;
-            padding: 20px;
         }
 
         .login-box {
             background: rgba(255, 255, 255, 0.95);
             padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .login-box h1 {
-            margin-bottom: 10px;
-            color: #2c3e50;
-            font-size: 1.8rem;
-        }
-
-        .subtitle {
-            color: #666;
-            font-size: 14px;
+        .header {
+            text-align: center;
             margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .connection-status {
+            margin-bottom: 25px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.loading {
+            background: #e8f4f8;
+            color: #2980b9;
+            border: 1px solid #bee5eb;
+        }
+
+        .connection-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .connection-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .auth-form {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
 
         .auth-form.hidden {
             display: none;
         }
 
-        .auth-form input, .auth-form select {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
+        .form-group {
+            position: relative;
         }
 
-        .auth-form input:focus, .auth-form select:focus {
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #e74c3c;
         }
 
         .auth-btn {
@@ -75,31 +128,60 @@
             background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .auth-btn:hover:not(:disabled) {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
         }
 
         .auth-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-btn.loading {
+            color: transparent;
+        }
+
+        .auth-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .switch-text {
             text-align: center;
-            margin-top: 15px;
-            color: #666;
+            margin-top: 20px;
+            color: #7f8c8d;
             font-size: 14px;
         }
 
         .switch-text a {
             color: #3498db;
             text-decoration: none;
+            font-weight: 600;
             cursor: pointer;
         }
 
@@ -108,9 +190,9 @@
         }
 
         .message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
             font-size: 14px;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -138,94 +220,132 @@
             border: 1px solid #bee5eb;
         }
 
-        .loading-spinner {
-            text-align: center;
+        .features {
+            background: rgba(52, 152, 219, 0.1);
             padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
         }
 
-        .loading-spinner.hidden {
-            display: none;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .demo-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 12px;
-            text-align: left;
-        }
-
-        .demo-info h4 {
+        .features h4 {
             color: #2c3e50;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
         }
 
-        .connection-status {
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            text-align: center;
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
-        .connection-status.connected {
-            background: #d4edda;
-            color: #155724;
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #555;
         }
 
-        .connection-status.error {
-            background: #f8d7da;
-            color: #721c24;
+        .feature-icon {
+            font-size: 16px;
+        }
+
+        .validation-message {
+            font-size: 12px;
+            color: #e74c3c;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .validation-message.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 480px) {
+            .login-box {
+                padding: 30px 25px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <h1>🚀 Supabase用户系统</h1>
-            <p class="subtitle">免费、开源、功能强大</p>
+            <div class="header">
+                <h1>🚀 欢迎访问</h1>
+                <p class="subtitle">基于Supabase的现代化用户系统</p>
+            </div>
 
             <!-- 连接状态 -->
-            <div id="connectionStatus" class="connection-status">
-                🔄 正在连接Supabase...
+            <div id="connectionStatus" class="connection-status loading">
+                🔄 正在连接到Supabase...
             </div>
             
             <!-- 登录表单 -->
             <div id="loginForm" class="auth-form">
-                <input type="email" id="loginEmail" placeholder="邮箱地址" autocomplete="email">
-                <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
-                <button onclick="loginUser()" class="auth-btn" id="loginBtn">登录</button>
+                <div class="form-group">
+                    <label for="loginEmail">邮箱地址</label>
+                    <input type="email" id="loginEmail" placeholder="请输入您的邮箱" autocomplete="email">
+                    <div id="loginEmailError" class="validation-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+                    <div id="loginPasswordError" class="validation-message"></div>
+                </div>
+                
+                <button onclick="handleLogin()" class="auth-btn" id="loginBtn">
+                    🔐 立即登录
+                </button>
+                
                 <div class="switch-text">
-                    没有账户？<a onclick="showRegister()">立即注册</a>
+                    还没有账户？<a onclick="showRegister()">立即注册</a>
                 </div>
             </div>
 
             <!-- 注册表单 -->
             <div id="registerForm" class="auth-form hidden">
-                <input type="text" id="registerName" placeholder="用户名（2-20个字符）">
-                <input type="email" id="registerEmail" placeholder="邮箱地址" autocomplete="email">
-                <input type="password" id="registerPassword" placeholder="密码（至少6位）" autocomplete="new-password">
-                <select id="userRole">
-                    <option value="editor">📝 编辑者 - 可以创建和编辑文章</option>
-                    <option value="admin">👑 管理员 - 可以管理所有内容</option>
-                </select>
-                <button onclick="registerUser()" class="auth-btn" id="registerBtn">注册</button>
+                <div class="form-group">
+                    <label for="registerName">用户名</label>
+                    <input type="text" id="registerName" placeholder="请输入用户名（2-20个字符）" maxlength="20">
+                    <div id="registerNameError" class="validation-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmail">邮箱地址</label>
+                    <input type="email" id="registerEmail" placeholder="请输入邮箱地址" autocomplete="email">
+                    <div id="registerEmailError" class="validation-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" placeholder="请输入密码（至少6位）" autocomplete="new-password">
+                    <div id="registerPasswordError" class="validation-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userRole">用户角色</label>
+                    <select id="userRole">
+                        <option value="editor">📝 编辑者 - 可以创建和编辑文章</option>
+                        <option value="admin">👑 管理员 - 拥有完整管理权限</option>
+                    </select>
+                </div>
+                
+                <button onclick="handleRegister()" class="auth-btn" id="registerBtn">
+                    ✨ 创建账户
+                </button>
+                
                 <div class="switch-text">
                     已有账户？<a onclick="showLogin()">立即登录</a>
                 </div>
@@ -233,58 +353,84 @@
 
             <!-- 消息显示 -->
             <div id="messageBox" class="message"></div>
-            
-            <!-- 加载指示器 -->
-            <div id="loadingSpinner" class="loading-spinner hidden">
-                <div class="spinner"></div>
-                <p>正在处理请求...</p>
-            </div>
 
-            <!-- 使用说明 -->
-            <div class="demo-info">
-                <h4>💡 使用说明：</h4>
-                <p>• 注册时请使用真实邮箱格式</p>
-                <p>• 密码至少6位字符</p>
-                <p>• 数据保存在Supabase云端</p>
-                <p>• 支持多人实时协作</p>
-                <p>• 完全免费使用</p>
+            <!-- 功能特性 -->
+            <div class="features">
+                <h4>🌟 系统特性</h4>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span>实时数据同步</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔒</span>
+                        <span>企业级安全</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">👥</span>
+                        <span>多人协作</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">☁️</span>
+                        <span>云端存储</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Supabase初始化脚本 -->
+    <!-- Supabase初始化和认证脚本 -->
     <script type="module">
-        import { supabase, checkConnection } from './supabase-config.js';
+        import { supabase, testConnection, checkTables } from './supabase-config.js';
         
-        // 设为全局变量
+        // 设置全局变量
         window.supabase = supabase;
         
-        // 检查连接状态
-        async function updateConnectionStatus() {
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializePage();
+        });
+        
+        // 初始化页面
+        async function initializePage() {
             const statusElement = document.getElementById('connectionStatus');
             
             try {
-                const isConnected = await checkConnection();
+                // 测试连接
+                const isConnected = await testConnection();
+                
                 if (isConnected) {
-                    statusElement.textContent = '✅ Supabase连接成功';
-                    statusElement.className = 'connection-status connected';
+                    // 检查表结构
+                    const tables = await checkTables();
                     
-                    // 3秒后隐藏状态
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 3000);
+                    if (tables.articles && tables.profiles) {
+                        statusElement.textContent = '✅ 系统就绪，可以开始使用';
+                        statusElement.className = 'connection-status success';
+                    } else {
+                        statusElement.textContent = '⚠️ 数据表未完全配置，功能可能受限';
+                        statusElement.className = 'connection-status error';
+                    }
                 } else {
-                    statusElement.textContent = '❌ Supabase连接失败，请检查配置';
+                    statusElement.textContent = '❌ 连接失败，请检查Supabase配置';
                     statusElement.className = 'connection-status error';
                 }
+                
+                // 3秒后隐藏状态提示
+                setTimeout(() => {
+                    if (statusElement.className.includes('success')) {
+                        statusElement.style.display = 'none';
+                    }
+                }, 3000);
+                
             } catch (error) {
-                statusElement.textContent = '❌ 网络连接失败';
+                console.error('初始化失败:', error);
+                statusElement.textContent = '❌ 初始化失败: ' + error.message;
                 statusElement.className = 'connection-status error';
             }
         }
         
-        // 页面加载后检查连接
-        updateConnectionStatus();
+        // 设置全局初始化函数
+        window.initializePage = initializePage;
         
         // 加载认证脚本
         import('./supabase-auth.js');

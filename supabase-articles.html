@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文章管理 - Supabase版本</title>
+    <title>文章管理系统</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="articles.css">
     <script src="auth-check.js"></script>
@@ -11,56 +11,106 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1 class="nav-logo">📝 Supabase文章管理</h1>
+            <h1 class="nav-logo">📝 文章管理系统</h1>
             <ul class="nav-menu">
                 <li><a href="index.html">🏠 返回首页</a></li>
-                <li><a href="#" onclick="logout()">🚪 退出</a></li>
+                <li><a href="#" onclick="logout()">🚪 退出登录</a></li>
             </ul>
         </div>
     </nav>
 
     <main class="articles-main">
         <div class="container">
-            <div class="articles-header">
+            <!-- 页面头部 -->
+            <div class="page-header">
                 <div class="header-content">
-                    <h1>📚 文章管理系统</h1>
-                    <p class="subtitle">基于Supabase实时数据库 • 支持多人协作</p>
+                    <h1>📚 文章管理中心</h1>
+                    <p class="subtitle">基于Supabase实时数据库 • 支持多人协作编辑</p>
                 </div>
                 <button onclick="createNewArticle()" class="new-article-btn" id="newArticleBtn">
-                    ➕ 新建文章
+                    ➕ 创建新文章
                 </button>
             </div>
 
-            <!-- 连接状态指示器 -->
-            <div id="connectionStatus" class="connection-status">
-                <span>🔄 正在连接Supabase...</span>
+            <!-- 系统状态 -->
+            <div id="systemStatus" class="system-status">
+                <div class="status-item">
+                    <span class="status-icon">🔄</span>
+                    <span class="status-text">正在连接Supabase...</span>
+                </div>
             </div>
 
-            <!-- 功能说明 -->
-            <div class="features-info">
+            <!-- 功能特性展示 -->
+            <div class="features-banner">
                 <div class="feature-item">
                     <span class="feature-icon">⚡</span>
-                    <span>实时同步</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">👥</span>
-                    <span>多人协作</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">☁️</span>
-                    <span>云端存储</span>
+                    <div class="feature-text">
+                        <strong>实时同步</strong>
+                        <span>多人编辑即时更新</span>
+                    </div>
                 </div>
                 <div class="feature-item">
                     <span class="feature-icon">🔒</span>
-                    <span>权限管理</span>
+                    <div class="feature-text">
+                        <strong>权限控制</strong>
+                        <span>安全的访问管理</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">☁️</span>
+                    <div class="feature-text">
+                        <strong>云端存储</strong>
+                        <span>数据永不丢失</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📱</span>
+                    <div class="feature-text">
+                        <strong>响应式设计</strong>
+                        <span>完美支持移动设备</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文章统计 -->
+            <div id="articlesStats" class="articles-stats hidden">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalArticles">0</div>
+                    <div class="stat-label">总文章数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="myArticles">0</div>
+                    <div class="stat-label">我的文章</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="todayArticles">0</div>
+                    <div class="stat-label">今日新增</div>
                 </div>
             </div>
 
             <!-- 文章列表 -->
-            <div class="articles-list" id="articlesList">
-                <div class="loading-articles">
-                    <div class="spinner"></div>
-                    <p>正在从Supabase加载文章...</p>
+            <div class="articles-section">
+                <div class="section-header">
+                    <h2>📄 文章列表</h2>
+                    <div class="articles-controls">
+                        <select id="sortOrder" onchange="handleSortChange()">
+                            <option value="newest">最新发布</option>
+                            <option value="oldest">最早发布</option>
+                            <option value="updated">最近更新</option>
+                            <option value="title">按标题排序</option>
+                        </select>
+                        <button onclick="refreshArticles()" class="refresh-btn" title="刷新列表">
+                            🔄
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="articlesList" class="articles-list">
+                    <div class="loading-placeholder">
+                        <div class="loading-spinner"></div>
+                        <p>正在从Supabase加载文章...</p>
+                        <p class="loading-tip">首次加载可能需要几秒钟</p>
+                    </div>
                 </div>
             </div>
 
@@ -68,14 +118,21 @@
             <div id="articleEditor" class="article-editor hidden">
                 <div class="editor-header">
                     <div class="editor-title-section">
-                        <input type="text" id="articleTitle" placeholder="输入文章标题..." maxlength="100">
-                        <div class="title-counter">
-                            <span id="titleCounter">0/100</span>
+                        <input type="text" 
+                               id="articleTitle" 
+                               placeholder="请输入文章标题..." 
+                               maxlength="100"
+                               autocomplete="off">
+                        <div class="title-info">
+                            <span id="titleCounter" class="counter">0/100</span>
                         </div>
                     </div>
                     <div class="editor-actions">
                         <button onclick="saveArticle()" class="save-btn" id="saveBtn">
-                            💾 保存到云端
+                            💾 保存文章
+                        </button>
+                        <button onclick="previewArticle()" class="preview-btn" id="previewBtn">
+                            👁️ 预览
                         </button>
                         <button onclick="closeEditor()" class="close-btn">
                             ❌ 关闭
@@ -84,165 +141,86 @@
                 </div>
                 
                 <div class="editor-body">
-                    <textarea id="articleContent" 
-                              placeholder="开始写作...&#10;&#10;💡 编写技巧：&#10;• 使用清晰的段落结构&#10;• 支持Ctrl+S快捷保存&#10;• 内容会自动保存到Supabase云端&#10;• 其他用户可以实时看到你的更新"></textarea>
-                    
                     <div class="editor-toolbar">
-                        <div class="word-count">
-                            <span>字数：</span>
-                            <span id="wordCount">0</span>
+                        <div class="toolbar-group">
+                            <button onclick="insertText('**', '**')" title="粗体" class="toolbar-btn">
+                                <strong>B</strong>
+                            </button>
+                            <button onclick="insertText('*', '*')" title="斜体" class="toolbar-btn">
+                                <em>I</em>
+                            </button>
+                            <button onclick="insertText('`', '`')" title="代码" class="toolbar-btn">
+                                &lt;/&gt;
+                            </button>
                         </div>
-                        <div class="editor-shortcuts">
-                            <span>💡 Ctrl+S保存 | Esc关闭</span>
+                        <div class="toolbar-group">
+                            <button onclick="insertText('## ', '')" title="标题" class="toolbar-btn">
+                                H2
+                            </button>
+                            <button onclick="insertText('- ', '')" title="列表" class="toolbar-btn">
+                                ≡
+                            </button>
+                            <button onclick="insertText('> ', '')" title="引用" class="toolbar-btn">
+                                "
+                            </button>
                         </div>
                     </div>
+                    
+                    <textarea id="articleContent" 
+                              placeholder="开始编写您的文章内容...&#10;&#10;💡 编写提示：&#10;• 支持Markdown格式&#10;• Ctrl+S 快速保存&#10;• Ctrl+Enter 发布文章&#10;• 内容会自动保存到云端&#10;• 支持实时协作编辑"></textarea>
                 </div>
                 
-                <div class="editor-info">
-                    <span id="editorInfo">Supabase实时编辑器</span>
-                    <div class="save-status">
-                        <span id="saveStatus"></span>
+                <div class="editor-footer">
+                    <div class="editor-info">
+                        <span id="editorStatus">就绪</span>
+                        <span class="separator">•</span>
+                        <span id="wordCount">0 字</span>
+                        <span class="separator">•</span>
+                        <span id="saveTime">未保存</span>
+                    </div>
+                    <div class="editor-shortcuts">
+                        <span>💡 快捷键：Ctrl+S保存 | Ctrl+Enter发布 | Esc关闭</span>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- 添加样式 -->
-    <style>
-        .articles-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
+    <!-- 文章预览模态框 -->
+    <div id="previewModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📖 文章预览</h3>
+                <button onclick="closePreview()" class="modal-close">❌</button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent" class="preview-content"></div>
+            </div>
+        </div>
+    </div>
 
-        .header-content h1 {
-            margin: 0 0 5px 0;
-            color: #2c3e50;
-        }
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>⚠️ 确认删除</h3>
+            </div>
+            <div class="modal-body">
+                <p>您确定要删除这篇文章吗？</p>
+                <p class="warning-text">此操作无法撤销！</p>
+                <div class="modal-actions">
+                    <button onclick="confirmDelete()" class="delete-confirm-btn">
+                        🗑️ 确认删除
+                    </button>
+                    <button onclick="cancelDelete()" class="cancel-btn">
+                        ↩️ 取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        .subtitle {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .features-info {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            padding: 15px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .feature-icon {
-            font-size: 16px;
-        }
-
-        .connection-status {
-            margin-bottom: 20px;
-            padding: 12px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .connection-status.success {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border-color: #c3e6cb;
-        }
-
-        .connection-status.error {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            color: #721c24;
-            border-color: #f5c6cb;
-        }
-
-        .editor-title-section {
-            flex: 1;
-            position: relative;
-        }
-
-        .title-counter {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 12px;
-            color: #999;
-        }
-
-        .editor-body {
-            position: relative;
-        }
-
-        .editor-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #ddd;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .word-count {
-            display: flex;
-            gap: 5px;
-        }
-
-        .save-status {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .loading-articles {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        @media (max-width: 768px) {
-            .articles-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .features-info {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .editor-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .editor-title-section {
-                width: 100%;
-            }
-        }
-    </style>
-
-    <!-- Supabase配置和文章管理 -->
+    <!-- Supabase和文章管理脚本 -->
     <script type="module">
         import { supabase } from './supabase-config.js';
         
@@ -251,152 +229,60 @@
         
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('页面加载完成，初始化Supabase文章管理');
+            console.log('📝 文章管理页面开始初始化...');
             
             // 延迟加载确保所有依赖就绪
             setTimeout(async () => {
                 try {
-                    // 加载文章管理模块
-                    await import('./supabase-articles.js');
+                    // 动态加载文章管理模块
+                    const articlesModule = await import('./supabase-articles.js');
                     
-                    // 初始化文章管理
-                    if (window.initSupabaseArticles) {
-                        await window.initSupabaseArticles();
+                    // 初始化文章管理系统
+                    if (window.initArticleSystem) {
+                        await window.initArticleSystem();
+                    } else {
+                        console.error('文章管理系统初始化函数未找到');
                     }
                 } catch (error) {
-                    console.error('初始化失败:', error);
-                    updateConnectionStatus('❌ 初始化失败: ' + error.message, 'error');
+                    console.error('初始化文章管理系统失败:', error);
+                    updateSystemStatus('❌ 系统初始化失败: ' + error.message, 'error');
                 }
             }, 1000);
         });
         
-        // 更新连接状态
-        function updateConnectionStatus(message, type) {
-            const statusElement = document.getElementById('connectionStatus');
+        // 更新系统状态
+        function updateSystemStatus(message, type = 'info') {
+            const statusElement = document.getElementById('systemStatus');
             if (statusElement) {
-                statusElement.innerHTML = message;
-                statusElement.className = `connection-status ${type}`;
+                const statusItem = statusElement.querySelector('.status-item');
+                const statusIcon = statusItem.querySelector('.status-icon');
+                const statusText = statusItem.querySelector('.status-text');
+                
+                statusText.textContent = message;
+                
+                // 更新图标和样式
+                if (type === 'success') {
+                    statusIcon.textContent = '✅';
+                    statusElement.className = 'system-status success';
+                } else if (type === 'error') {
+                    statusIcon.textContent = '❌';
+                    statusElement.className = 'system-status error';
+                } else {
+                    statusIcon.textContent = '🔄';
+                    statusElement.className = 'system-status loading';
+                }
+                
+                // 成功状态3秒后隐藏
+                if (type === 'success') {
+                    setTimeout(() => {
+                        statusElement.style.display = 'none';
+                    }, 3000);
+                }
             }
         }
         
         // 设为全局函数
-        window.updateConnectionStatus = updateConnectionStatus;
-    </script>
-
-    <!-- 传统文章管理作为后备 -->
-    <script src="articles.js"></script>
-
-    <!-- 编辑器功能增强 -->
-    <script>
-        // 标题字数统计
-        document.addEventListener('DOMContentLoaded', function() {
-            const titleInput = document.getElementById('articleTitle');
-            const titleCounter = document.getElementById('titleCounter');
-            const contentTextarea = document.getElementById('articleContent');
-            const wordCount = document.getElementById('wordCount');
-            
-            if (titleInput && titleCounter) {
-                titleInput.addEventListener('input', function() {
-                    const length = this.value.length;
-                    titleCounter.textContent = `${length}/100`;
-                    
-                    if (length > 90) {
-                        titleCounter.style.color = '#e74c3c';
-                    } else if (length > 70) {
-                        titleCounter.style.color = '#f39c12';
-                    } else {
-                        titleCounter.style.color = '#999';
-                    }
-                });
-            }
-            
-            // 内容字数统计
-            if (contentTextarea && wordCount) {
-                contentTextarea.addEventListener('input', function() {
-                    const text = this.value;
-                    const count = text.length;
-                    wordCount.textContent = count.toLocaleString();
-                });
-            }
-        });
-        
-        // 创建新文章
-        function createNewArticle() {
-            if (!hasPermission('edit')) {
-                alert('您没有编辑权限');
-                return;
-            }
-            
-            window.currentEditingId = null;
-            document.getElementById('articleTitle').value = '';
-            document.getElementById('articleContent').value = '';
-            document.getElementById('editorInfo').textContent = '正在创建新文章...';
-            document.getElementById('saveStatus').textContent = '';
-            document.getElementById('articleEditor').classList.remove('hidden');
-            document.getElementById('articleTitle').focus();
-            
-            // 重置计数器
-            document.getElementById('titleCounter').textContent = '0/100';
-            document.getElementById('wordCount').textContent = '0';
-        }
-        
-        // 保存文章
-        function saveArticle() {
-            const title = document.getElementById('articleTitle').value.trim();
-            const content = document.getElementById('articleContent').value.trim();
-            
-            if (!title || !content) {
-                alert('请填写标题和内容');
-                return;
-            }
-            
-            // 显示保存状态
-            const saveStatus = document.getElementById('saveStatus');
-            const saveBtn = document.getElementById('saveBtn');
-            
-            saveStatus.textContent = '正在保存...';
-            saveBtn.disabled = true;
-            saveBtn.textContent = '⏳ 保存中...';
-            
-            // 使用Supabase保存
-            if (window.saveArticleToSupabase) {
-                window.saveArticleToSupabase(title, content).finally(() => {
-                    saveStatus.textContent = '';
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 保存到云端';
-                });
-            } else {
-                // 后备方案
-                setTimeout(() => {
-                    saveStatus.textContent = '';
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 保存到云端';
-                    alert('保存功能暂时不可用');
-                }, 1000);
-            }
-        }
-        
-        // 关闭编辑器
-        function closeEditor() {
-            document.getElementById('articleEditor').classList.add('hidden');
-            window.currentEditingId = null;
-        }
-        
-        // 键盘快捷键
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                if (!document.getElementById('articleEditor').classList.contains('hidden')) {
-                    saveArticle();
-                }
-            }
-            
-            if (e.key === 'Escape') {
-                if (!document.getElementById('articleEditor').classList.contains('hidden')) {
-                    closeEditor();
-                }
-            }
-        });
+        window.updateSystemStatus = updateSystemStatus;
     </script>
 </body>
 </html>
