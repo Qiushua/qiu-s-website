@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人网站</title>
     <link rel="stylesheet" href="style.css">
-    <script src="auth-check.js"></script>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -16,7 +15,6 @@
                 <li><a href="#home">首页</a></li>
                 <li><a href="#about">关于</a></li>
                 <li><a href="#services">服务</a></li>
-                <li><a href="supabase-articles.html" id="articlesLink" style="display: none;">📝 文章管理</a></li>
                 <li><a href="#contact">联系</a></li>
             </ul>
         </div>
@@ -29,7 +27,7 @@
             <div class="hero-content">
                 <h1>欢迎来到我的网站</h1>
                 <p>这里是我的个人空间，分享我的想法和作品</p>
-                <button class="cta-button" onclick="scrollToSection('about')">了解更多</button>
+                <button class="cta-button">了解更多</button>
             </div>
         </section>
 
@@ -39,17 +37,8 @@
                 <h2>关于我</h2>
                 <div class="about-content">
                     <div class="about-text">
-                        <p>你好！我是一个热爱学习的人，这是我的个人网站。在这里我会分享我的学习心得、生活感悟和有趣的项目。</p>
+                        <p>你好！我是一个热爱学习的人，这是我的第一个网站。在这里我会分享我的学习心得、生活感悟和有趣的项目。</p>
                         <p>我相信通过持续学习和努力，每个人都能创造出属于自己的精彩。</p>
-                        <div class="tech-stack">
-                            <h3>技术栈</h3>
-                            <div class="tech-items">
-                                <span class="tech-item">🔥 Supabase</span>
-                                <span class="tech-item">⚡ JavaScript</span>
-                                <span class="tech-item">🎨 CSS3</span>
-                                <span class="tech-item">📱 响应式设计</span>
-                            </div>
-                        </div>
                     </div>
                     <div class="about-image">
                         <div class="placeholder-image">
@@ -63,19 +52,19 @@
         <!-- 服务部分 -->
         <section id="services" class="services">
             <div class="container">
-                <h2>功能特色</h2>
+                <h2>我的技能</h2>
                 <div class="services-grid">
                     <div class="service-card">
-                        <h3>🔐 用户认证</h3>
-                        <p>基于Supabase的安全用户系统</p>
+                        <h3>🎨 设计</h3>
+                        <p>创意设计和用户体验</p>
                     </div>
                     <div class="service-card">
-                        <h3>📝 文章管理</h3>
-                        <p>实时协作的内容管理系统</p>
+                        <h3>💻 编程</h3>
+                        <p>网站开发和应用制作</p>
                     </div>
                     <div class="service-card">
-                        <h3>☁️ 云端存储</h3>
-                        <p>数据安全保存在云端</p>
+                        <h3>✍️ 写作</h3>
+                        <p>内容创作和文案撰写</p>
                     </div>
                 </div>
             </div>
@@ -100,79 +89,10 @@
     <!-- 页脚 -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 我的网站. 基于Supabase驱动.</p>
+            <p>&copy; 2024 我的网站. 保留所有权利.</p>
         </div>
     </footer>
 
     <script src="script.js"></script>
-    
-    <!-- 额外功能脚本 -->
-    <script>
-        // 平滑滚动到指定部分
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-        
-        // 更新技术栈样式
-        document.addEventListener('DOMContentLoaded', function() {
-            const techItems = document.querySelectorAll('.tech-item');
-            techItems.forEach((item, index) => {
-                item.style.animationDelay = `${index * 0.1}s`;
-            });
-        });
-    </script>
-    
-    <style>
-        /* 额外样式 */
-        .tech-stack {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(52, 152, 219, 0.1);
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .tech-stack h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .tech-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .tech-item {
-            background: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            border: 1px solid #3498db;
-            color: #2c3e50;
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .tech-items {
-                justify-content: center;
-            }
-        }
-    </style>
 </body>
 </html>
